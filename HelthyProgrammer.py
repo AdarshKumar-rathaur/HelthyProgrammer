@@ -1,53 +1,54 @@
-import time
-import pygame
-import datetime
 
-freq = 1000    # audio CD quality
-bitsize = -16   # unsigned 16 bit
-channels = 2    # 1 is mono, 2 is stereo
-buffer = 1024
-pygame.mixer.init(freq,bitsize,channels,buffer)
-pygame.mixer.music.set_volume(10)
-def playsound(music):
-    pygame.init()
-    pygame.mixer.music.load(music)
-    pygame.mixer.music.play(5)
+#Healthy Programmer
+# 9am - 5pm
+# Water - water.mp3 (3.5 litres) - Drank - log - Every 40 min
+# Eyes - eyes.mp3 - every 30 min - EyDone - log - Every 30 min
+# Physical activity - physical.mp3 every - 45 min - ExDone - log
+# Rules
+# Pygame module to play audio
 
-    clock = pygame.time.Clock()
-    while pygame.mixer.music.get_busy():
-        # print "Playing..."
-        pygame.mixer.music.play(5)
-        # print("playing...........")
-        pygame.mixer.music.rewind()
-        clock.tick(1000)
+from pygame import mixer
+from datetime import datetime
+from time import time
 
-watertime=0
-eyestime=0
-physicletime=0
-while True:
-    with open("helthyprogram.txt",'a') as f:
-        time.sleep(1)
-        watertime+=1
-        eyestime+=1
-        physicletime+=1
-        if(watertime==20*60):
-            playsound("water.mp3")
-            if input("Are you drinking water :")=='done':
-                f.write(datetime.datetime.now(),"you drank water at \n")
-                pygame.mixer.music.stop()
-            watertime=0
-        elif(eyestime==30*60):
-            playsound('eyes.mp3')
-            if input("Are you drinking water :")=='done':
-                f.write(datetime.datetime.now(),"eyes excersice \n")
+def musiconloop(file, stopper):
+    mixer.init()
+    mixer.music.load(file)
+    mixer.music.play()
+    while True:
+        input_of_user = input()
+        if input_of_user == stopper:
+            mixer.music.stop()
+            break
 
-                pygame.mixer.music.stop()
+def log_now(msg):
+    with open("mylogs.txt", "a") as f:
+        f.write(f"{msg} {datetime.now()}\n")
 
-            eyestime=0
-        elif physicletime==45*60:
-            playsound("physical.mp3")
-            if input("Are you drinking water :")=='done':
-                f.write(datetime.datetime.now(),"physical excersice \n")
+if __name__ == '__main__':
+    # musiconloop("water.mp3", "stop")
+    init_water = time()
+    init_eyes = time()
+    init_exercise = time()
+    watersecs = 40*60
+    exsecs = 30*60
+    eyessecs = 45*60
 
-                pygame.mixer.music.stop()
-            physicletime=0
+    while True:
+        if time() - init_water > watersecs:
+            print("Water Drinking time. Enter 'drank' to stop the alarm.")
+            musiconloop('water.mp3', 'drank')
+            init_water = time()
+            log_now("Drank Water at")
+
+        if time() - init_eyes >eyessecs:
+            print("Eye exercise time. Enter 'doneeyes' to stop the alarm.")
+            musiconloop('eyes.mp3', 'doneeyes')
+            init_eyes = time()
+            log_now("Eyes Relaxed at")
+
+        if time() - init_exercise > exsecs:
+            print("Physical Activity Time. Enter 'donephy' to stop the alarm.")
+            musiconloop('physical.mp3', 'donephy')
+            init_exercise = time()
+            log_now("Physical Activity done at")
